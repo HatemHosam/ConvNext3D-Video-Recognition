@@ -38,7 +38,7 @@ class VideoClassificationLightningModule(pytorch_lightning.LightningModule):
     Setup the Adam optimizer. Note, that this function also can return a lr scheduler, which is
     usually useful for training video models.
     """
-    return torch.optim.Adam(self.parameters(), lr=1e-2)
+    return torch.optim.Adam(self.parameters(), lr=1e-3, weight_decay=1e-4)
     
 def train():
   checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(
