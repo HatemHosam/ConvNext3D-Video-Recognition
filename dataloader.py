@@ -55,6 +55,7 @@ class KineticsDataModule(pytorch_lightning.LightningDataModule):
     train_dataset = pytorchvideo.data.Kinetics(
         data_path=os.path.join(self._DATA_PATH, "train"),
         clip_sampler=pytorchvideo.data.make_clip_sampler("random", self._CLIP_DURATION),
+        decode_audio=False,
         transform=train_transform
     )
     return torch.utils.data.DataLoader(
@@ -85,6 +86,7 @@ class KineticsDataModule(pytorch_lightning.LightningDataModule):
     val_dataset = pytorchvideo.data.Kinetics(
         data_path=os.path.join(self._DATA_PATH, "val"),
         clip_sampler=pytorchvideo.data.make_clip_sampler("uniform", self._CLIP_DURATION),
+        decode_audio=False,
         transform=val_transform
     )
     return torch.utils.data.DataLoader(
