@@ -5,7 +5,7 @@ import pytorchvideo.data
 import torch.utils.data
 
 from pytorchvideo.transforms import (
-    Resize
+    Resize,
     ApplyTransformToKey,
     Normalize,
     RandomShortSideScale,
