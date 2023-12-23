@@ -41,9 +41,13 @@ class VideoClassificationLightningModule(pytorch_lightning.LightningModule):
     return torch.optim.Adam(self.parameters(), lr=1e-2)
     
 def train():
+  checkpoint_callback = pytorch_lightning.callbacks.ModelCheckpoint(
+      dirpath='/data/Hatem/ConvNext3D-Video-Recognition/checkpoints/',
+      filename='{epoch}-{val_loss:.2f}-{other_metric:.2f}',
+      every_n_epochs = 10)
   classification_module = VideoClassificationLightningModule()
   data_module = KineticsDataModule()
-  trainer = pytorch_lightning.Trainer(max_epochs=150)
+  trainer = pytorch_lightning.Trainer(max_epochs=150, callbacks=[checkpoint_callback])
   trainer.fit(classification_module, data_module)
   
 train()
