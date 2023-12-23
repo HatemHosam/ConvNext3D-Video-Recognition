@@ -53,7 +53,7 @@ class ConvNeXt(nn.Module):
         layer_scale_init_value (float): Init value for Layer Scale. Default: 1e-6.
         head_init_scale (float): Init scaling value for classifier weights and biases. Default: 1.
     """
-    def __init__(self, in_chans=3, num_classes=101, #number of classes for UCF-101, Kinetics-700  
+    def __init__(self, in_chans=3, num_classes=600, #number of classes for UCF-101, Kinetics-700  
                  depths=[2, 2, 2, 2], dims=[96, 192, 384, 768], drop_path_rate=0., 
                  layer_scale_init_value=1e-6, head_init_scale=1.,
                  ):
