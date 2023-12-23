@@ -47,7 +47,7 @@ def train():
       every_n_epochs = 10)
   classification_module = VideoClassificationLightningModule()
   data_module = KineticsDataModule()
-  trainer = pytorch_lightning.Trainer(max_epochs=150, callbacks=[checkpoint_callback])
+  trainer = pytorch_lightning.Trainer(max_epochs=100, callbacks=[checkpoint_callback])
   trainer.fit(classification_module, data_module)
   
 train()
