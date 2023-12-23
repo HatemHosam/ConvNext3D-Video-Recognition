@@ -6,8 +6,8 @@ from timm.models.registry import register_model
 
 class Block(nn.Module):
     r""" ConvNeXt Block. There are two equivalent implementations:
-    (1) DwConv -> LayerNorm (channels_first) -> 1x1 Conv -> GELU -> 1x1 Conv; all in (N, C, H, W, Z)
-    (2) DwConv -> Permute to (N, H, W, Z, C); LayerNorm (channels_last) -> Linear -> GELU -> Linear; Permute back
+    (1) DwConv -> LayerNorm (channels_first) -> 1x1 Conv -> GELU -> 1x1 Conv; all in (N, C, Z, H, W)
+    (2) DwConv -> Permute to (N, Z, H, W, C); LayerNorm (channels_last) -> Linear -> GELU -> Linear; Permute back
     We use (2) as we find it slightly faster in PyTorch
     
     Args:
@@ -17,7 +17,7 @@ class Block(nn.Module):
     """
     def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
-        self.dwconv = nn.Conv3d(dim, dim, kernel_size=7, padding=3, groups=dim) # depthwise conv
+        self.dwconv = nn.Conv3d(dim, dim, kernel_size=(7,7,7), padding=(3,3,3), groups=dim) # depthwise conv
         self.norm = LayerNorm(dim, eps=1e-6)
         self.pwconv1 = nn.Linear(dim, 4 * dim) # pointwise/1x1 convs, implemented with linear layers
         self.act = nn.GELU()
@@ -29,14 +29,14 @@ class Block(nn.Module):
     def forward(self, x):
         input = x
         x = self.dwconv(x)
-        x = x.permute(0, 2, 3, 4, 1) # (N, C, H, W, Z) -> (N, H, W, Z, C)
+        x = x.permute(0, 2, 3, 4, 1) # (N, C, Z, H, W) -> (N, Z, H, W, C)
         x = self.norm(x)
         x = self.pwconv1(x)
         x = self.act(x)
         x = self.pwconv2(x)
         if self.gamma is not None:
             x = self.gamma * x
-        x = x.permute(0, 4, 1, 2, 3) # (N, H, W, Z, C) -> (N, C, H, W, Z)
+        x = x.permute(0, 4, 1, 2, 3) # (N, Z, H, W, C) -> (N, C, Z, H, W)
 
         x = input + self.drop_path(x)
         return x
@@ -53,22 +53,22 @@ class ConvNeXt(nn.Module):
         layer_scale_init_value (float): Init value for Layer Scale. Default: 1e-6.
         head_init_scale (float): Init scaling value for classifier weights and biases. Default: 1.
     """
-    def __init__(self, in_chans=3, num_classes=600, #number of classes for Kinetics-700  
-                 depths=[2, 2, 4, 2], dims=[96, 192, 384, 768], drop_path_rate=0., 
+    def __init__(self, in_chans=3, num_classes=101, #number of classes for UCF-101, Kinetics-700  
+                 depths=[2, 2, 2, 2], dims=[96, 192, 384, 768], drop_path_rate=0., 
                  layer_scale_init_value=1e-6, head_init_scale=1.,
                  ):
         super().__init__()
 
         self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
         stem = nn.Sequential(
-            nn.Conv3d(in_chans, dims[0], kernel_size=4, stride=4),
+            nn.Conv3d(in_chans, dims[0], kernel_size=(4,4,4), stride=(4,4,4)),
             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
         )
         self.downsample_layers.append(stem)
         for i in range(3):
             downsample_layer = nn.Sequential(
                     LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                    nn.Conv3d(dims[i], dims[i+1], kernel_size=2, stride=2),
+                    nn.Conv3d(dims[i], dims[i+1], kernel_size=(2,2,2), stride=(2,2,2), padding = (1,1,1)),
             )
             self.downsample_layers.append(downsample_layer)
 
@@ -132,33 +132,26 @@ class LayerNorm(nn.Module):
             x = self.weight[:, None, None, None] * x + self.bias[:, None, None, None]
             return x
 
-
-@register_model
 def convnext_xtiny(**kwargs):
     model = ConvNeXt(depths=[2, 2, 2, 2], dims=[96, 192, 384, 768], **kwargs)
     return model
 
-@register_model
 def convnext_tiny(**kwargs):
     model = ConvNeXt(depths=[3, 3, 9, 3], dims=[96, 192, 384, 768], **kwargs)
     return model
 
-@register_model
 def convnext_small(**kwargs):
     model = ConvNeXt(depths=[3, 3, 27, 3], dims=[96, 192, 384, 768], **kwargs)
     return model
 
-@register_model
 def convnext_base(**kwargs):
     model = ConvNeXt(depths=[3, 3, 27, 3], dims=[128, 256, 512, 1024], **kwargs)
     return model
 
-@register_model
 def convnext_large(**kwargs):
     model = ConvNeXt(depths=[3, 3, 27, 3], dims=[192, 384, 768, 1536], **kwargs)
     return model
 
-@register_model
 def convnext_xlarge(**kwargs):
     model = ConvNeXt(depths=[3, 3, 27, 3], dims=[256, 512, 1024, 2048], **kwargs)
     return model
