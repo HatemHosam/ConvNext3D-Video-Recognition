@@ -5,7 +5,6 @@ import pytorchvideo.data
 import torch.utils.data
 
 from pytorchvideo.transforms import (
-    Resize,
     ApplyTransformToKey,
     Normalize,
     RandomShortSideScale,
@@ -16,6 +15,7 @@ from pytorchvideo.transforms import (
 
 from torchvision.transforms import (
     Compose,
+    Resize,
     Lambda,
     RandomCrop,
     RandomHorizontalFlip
