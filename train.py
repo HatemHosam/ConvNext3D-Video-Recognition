@@ -43,7 +43,7 @@ class VideoClassificationLightningModule(pytorch_lightning.LightningModule):
 def train():
   classification_module = VideoClassificationLightningModule()
   data_module = KineticsDataModule()
-  trainer = pytorch_lightning.Trainer()
+  trainer = pytorch_lightning.Trainer(max_epochs=150)
   trainer.fit(classification_module, data_module)
   
 train()
