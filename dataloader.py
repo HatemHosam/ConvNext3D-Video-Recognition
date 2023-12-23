@@ -40,7 +40,8 @@ class KineticsDataModule(pytorch_lightning.LightningDataModule):
               key="video",
               transform=Compose(
                   [
-                    UniformTemporalSubsample(8),
+                    Resize((360,204)),
+                    UniformTemporalSubsample(16),
                     Lambda(lambda x: x / 255.0),
                     Normalize((0.45, 0.45, 0.45), (0.225, 0.225, 0.225)),
                     RandomShortSideScale(min_size=256, max_size=320),
@@ -73,7 +74,8 @@ class KineticsDataModule(pytorch_lightning.LightningDataModule):
               key="video",
               transform=Compose(
                   [
-                    UniformTemporalSubsample(8),
+                    Resize((360,204)),
+                    UniformTemporalSubsample(16),
                     Lambda(lambda x: x / 255.0),
                     Normalize((0.45, 0.45, 0.45), (0.225, 0.225, 0.225)),
                   ]
