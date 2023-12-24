@@ -27,7 +27,7 @@ class KineticsDataModule(pytorch_lightning.LightningDataModule):
   # Insert the data path in here
   _DATA_PATH = "/data/i5O/k600/"
   _CLIP_DURATION = 16  # Duration of sampled clip for each video
-  _BATCH_SIZE = 32
+  _BATCH_SIZE = 64
   _NUM_WORKERS = 0  # Number of parallel processes fetching data
 
   def train_dataloader(self):
